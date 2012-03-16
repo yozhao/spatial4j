@@ -25,7 +25,6 @@ import static com.spatial4j.core.distance.DistanceUtils.toRadians;
 
 /**
  * A base class for a Distance Calculator that assumes a spherical earth model.
- * @author dsmiley
  */
 public abstract class GeodesicSphereDistCalc extends AbstractDistanceCalculator {
   protected final double radius;
@@ -51,14 +50,14 @@ public abstract class GeodesicSphereDistCalc extends AbstractDistanceCalculator 
       return from;
     double[] latLon = DistanceUtils.pointOnBearingRAD(
         toRadians(from.getY()), toRadians(from.getX()),
-        DistanceUtils.dist2Radians(dist,ctx.getUnits().earthRadius()),
+        DistanceUtils.dist2Radians(dist,ctx.getCRS().getProjection().getEquatorRadius()),
         toRadians(bearingDEG), null);
     return ctx.makePoint(Math.toDegrees(latLon[1]), Math.toDegrees(latLon[0]));
   }
 
   @Override
   public Rectangle calcBoxByDistFromPt(Point from, double distance, SpatialContext ctx) {
-    assert radius == ctx.getUnits().earthRadius();
+    assert radius == ctx.getCRS().getProjection().getEquatorRadius();
     if (distance == 0)
       return from.getBoundingBox();
     return DistanceUtils.calcBoxByDistFromPtDEG(from.getY(), from.getX(), distance, ctx);

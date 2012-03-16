@@ -21,19 +21,28 @@ import com.spatial4j.core.context.simple.SimpleSpatialContext;
 import com.spatial4j.core.context.simple.SimpleSpatialContextFactory;
 import com.spatial4j.core.distance.*;
 import com.spatial4j.core.shape.Rectangle;
+import com.spatial4j.core.shape.simple.RectangleImpl;
+import com.spatial4j.proj4j.CRSFactory;
+import com.spatial4j.proj4j.CoordinateReferenceSystem;
+import com.spatial4j.proj4j.units.Unit;
+import com.spatial4j.proj4j.units.Units;
 
 import java.util.Map;
 
 /**
  * Factory for a SpatialContext.
- * is 
- * @author dsmiley
  */
 public abstract class SpatialContextFactory {
-  protected Map<String, String> args;
+  public static final String PROJ4_WGS84 = "+title=WGS84 +proj=longlat +datum=WGS84 +units=degrees";
+  public static final CoordinateReferenceSystem CRS_WGS84;
+  static {
+    CRSFactory factory = new CRSFactory();
+    CRS_WGS84 = factory.createFromParameters("WGS84", PROJ4_WGS84);
+  }
   protected ClassLoader classLoader;
   
-  protected DistanceUnits units;
+  protected CoordinateReferenceSystem crs;
+  protected Unit units;
   protected DistanceCalculator calculator;
   protected Rectangle worldBounds;
 
@@ -64,50 +73,58 @@ public abstract class SpatialContextFactory {
   }
 
   protected void init(Map<String, String> args, ClassLoader classLoader) {
-    this.args = args;
     this.classLoader = classLoader;
-    initUnits();
-    initCalculator();
-    initWorldBounds();
+
+    String v = args.get("units");
+    this.units = (v==null)?Units.KILOMETRES : Units.findUnits(v);
+    
+    v = args.get("worldBounds");
+    if(v!=null) {
+      // ugly way to read the bounds!
+      SimpleSpatialContext simpleCtx = new SimpleSpatialContext(new RectangleImpl(0, 0, 0, 0),null);
+      worldBounds = (Rectangle) simpleCtx.readShape(v);
+
+      this.calculator = initCalculator(args.get("distCalculator"),-1); // no valid radius!
+    }
+    else {
+      CRSFactory factory = new CRSFactory();
+      v = args.get("crs");
+      if(v==null || "WGS84".equals(v)) {
+        this.crs = factory.createFromParameters("WGS84", PROJ4_WGS84);
+      }
+      else {
+        this.crs = factory.createFromName(v);
+      }
+      
+      this.calculator = initCalculator(args.get("distCalculator"),crs.getProjection().getEquatorRadius());
+    }
+    
   }
 
-  protected void initUnits() {
-    String unitsStr = args.get("units");
-    if (unitsStr != null)
-      units = DistanceUnits.findDistanceUnit(unitsStr);
-    if (units == null)
-      units = DistanceUnits.KILOMETERS;
-  }
-
-  protected void initCalculator() {
-    String calcStr = args.get("distCalculator");
+  protected DistanceCalculator initCalculator(String calcStr, double radius) {
     if (calcStr == null)
-      return;
+      return null;
+    
     if (calcStr.equalsIgnoreCase("haversine")) {
-      calculator = new GeodesicSphereDistCalc.Haversine(units.earthRadius());
+      return new GeodesicSphereDistCalc.Haversine(radius);
     } else if (calcStr.equalsIgnoreCase("lawOfCosines")) {
-      calculator = new GeodesicSphereDistCalc.LawOfCosines(units.earthRadius());
+      return new GeodesicSphereDistCalc.LawOfCosines(radius);
     } else if (calcStr.equalsIgnoreCase("vincentySphere")) {
-      calculator = new GeodesicSphereDistCalc.Vincenty(units.earthRadius());
+      return new GeodesicSphereDistCalc.Vincenty(radius);
     } else if (calcStr.equalsIgnoreCase("cartesian")) {
-      calculator = new CartesianDistCalc();
+      return new CartesianDistCalc();
     } else if (calcStr.equalsIgnoreCase("cartesian^2")) {
-      calculator = new CartesianDistCalc(true);
+      return new CartesianDistCalc(true);
     } else {
       throw new RuntimeException("Unknown calculator: "+calcStr);
     }
   }
-
-  protected void initWorldBounds() {
-    String worldBoundsStr = args.get("worldBounds");
-    if (worldBoundsStr == null)
-      return;
-    //kinda ugly we do this just to read a rectangle.  TODO refactor
-    SimpleSpatialContext simpleCtx = new SimpleSpatialContext(units, calculator, null);
-    worldBounds = (Rectangle) simpleCtx.readShape(worldBoundsStr);
+  
+  public SpatialContext newMaxCartesian() {
+    this.worldBounds = new RectangleImpl(Double.MIN_VALUE, Double.MAX_VALUE, Double.MIN_VALUE, Double.MAX_VALUE);
+    return newSpatialContext();
   }
 
   /** Subclasses should simply construct the instance from the initialized configuration. */
   protected abstract SpatialContext newSpatialContext();
-
 }

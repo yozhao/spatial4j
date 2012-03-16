@@ -22,10 +22,9 @@ import com.spatial4j.core.context.simple.SimpleSpatialContext;
 
 /**
  */
-public class SpatialContextTestCase extends BaseSpatialContextTestCase {
-
+public class SimpleContextTestCase extends BaseSpatialContextTestCase {
   @Override
   protected SpatialContext getSpatialContext() {
-    return SimpleSpatialContext.GEO_KM;
+    return new SimpleSpatialContext(); // WGS84
   }
 }

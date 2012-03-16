@@ -45,10 +45,12 @@ public class JtsEnvelope implements Rectangle {
     return getWidth() > 0 && getHeight() > 0;
   }
 
+  @Override
   public double getArea() {
     return getWidth() * getHeight();
   }
 
+  @Override
   public boolean getCrossesDateLine() {
     return false;
   }

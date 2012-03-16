@@ -47,6 +47,7 @@ public class CircleImpl implements Circle {
     this.enclosingBox = ctx.getDistCalc().calcBoxByDistFromPt(point, distance, ctx);
   }
 
+  @Override
   public Point getCenter() {
     return point;
   }

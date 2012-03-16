@@ -17,10 +17,12 @@
 package com.spatial4j.core.context;
 
 import com.spatial4j.core.context.simple.SimpleSpatialContext;
-import com.spatial4j.core.distance.DistanceUnits;
 import com.spatial4j.core.distance.CartesianDistCalc;
 import com.spatial4j.core.distance.GeodesicSphereDistCalc;
+import com.spatial4j.core.distance.GeodesicSphereDistCalc.Haversine;
 import com.spatial4j.core.shape.simple.RectangleImpl;
+import com.spatial4j.proj4j.datum.Datum;
+
 import org.junit.After;
 import org.junit.Test;
 
@@ -50,21 +52,15 @@ public class SpatialContextFactoryTest {
   
   @Test
   public void testDefault() {
-    SpatialContext s = SimpleSpatialContext.GEO_KM;
-    SpatialContext t = call();//default
-    assertEquals(s.getClass(),t.getClass());
-    assertEquals(s.getUnits(),t.getUnits());
-    assertEquals(s.getDistCalc(),t.getDistCalc());
-    assertEquals(s.getWorldBounds(),t.getWorldBounds());
+    SpatialContext ctx = call();//default
+    assertEquals(SimpleSpatialContext.class,ctx.getClass());
+    assertEquals(Datum.WGS84,ctx.getCRS().getDatum());
+    assertEquals(Haversine.class,ctx.getDistCalc().getClass());
   }
   
   @Test
   public void testCustom() {
-    SpatialContext sc = call("units","u");
-    assertEquals(DistanceUnits.CARTESIAN,sc.getUnits());
-    assertEquals(new CartesianDistCalc(),sc.getDistCalc());
-
-    sc = call("units","u",
+    SpatialContext sc = call("units","u",
         "distCalculator","cartesian^2",
         "worldBounds","-100 0 75 200");//West South East North
     assertEquals(new CartesianDistCalc(true),sc.getDistCalc());
@@ -72,22 +68,22 @@ public class SpatialContextFactoryTest {
 
     sc = call("units","miles",
         "distCalculator","lawOfCosines");
-    assertEquals(DistanceUnits.MILES,sc.getUnits());
-    assertEquals(new GeodesicSphereDistCalc.LawOfCosines(sc.getUnits().earthRadius()),
+    assertEquals(new GeodesicSphereDistCalc.LawOfCosines(Datum.WGS84.getEllipsoid().getEquatorRadius()),
         sc.getDistCalc());
   }
   
   @Test
   public void testSystemPropertyLookup() {
     System.setProperty(PROP,DSCF.class.getName());
-    assertEquals(DistanceUnits.CARTESIAN,call().getUnits());//DSCF returns this
+    
+    assertEquals(new RectangleImpl(0,100,0,100),call().getWorldBounds());//DSCF returns this
   }
 
   public static class DSCF extends SpatialContextFactory {
 
     @Override
     protected SpatialContext newSpatialContext() {
-      return new SimpleSpatialContext(DistanceUnits.CARTESIAN);
+      return new SimpleSpatialContext(new RectangleImpl(0,100,0,100),null);
     }
   }
 }

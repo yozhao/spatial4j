@@ -27,7 +27,7 @@ import java.util.List;
 
 public class GridInfoServlet extends HttpServlet
 {
-  JtsSpatialContext ctx = JtsSpatialContext.GEO_KM;
+  JtsSpatialContext ctx = new JtsSpatialContext();
 
   @Override
   public void init(ServletConfig config) throws ServletException {

@@ -33,7 +33,6 @@ import org.apache.solr.schema.TrieField;
 import org.apache.solr.spatial.SpatialFieldType;
 
 import com.spatial4j.core.context.jts.JtsSpatialContext;
-import com.spatial4j.core.distance.DistanceUnits;
 
 
 
@@ -65,7 +64,7 @@ public class BBoxFieldType extends SpatialFieldType<BBoxFieldInfo> implements Sc
       booleanFieldName = v;
     }
 
-    ctx = new JtsSpatialContext(DistanceUnits.KILOMETERS);
+    ctx = new JtsSpatialContext();
     spatialStrategy = new BBoxStrategy(ctx);
     spatialStrategy.setIgnoreIncompatibleGeometry( ignoreIncompatibleGeometry );
   }

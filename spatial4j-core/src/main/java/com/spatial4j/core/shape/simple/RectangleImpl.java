@@ -145,6 +145,7 @@ public class RectangleImpl implements Rectangle {
     return SpatialRelation.INTERSECTS;
   }
 
+  @Override
   public SpatialRelation relate_yRange(double ext_minY, double ext_maxY, SpatialContext ctx) {
     if (ext_minY > maxY || ext_maxY < minY) {
       return SpatialRelation.DISJOINT;

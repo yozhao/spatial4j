@@ -20,6 +20,7 @@ package com.spatial4j.core.distance;
 import com.spatial4j.core.RandomSeed;
 import com.spatial4j.core.context.SpatialContext;
 import com.spatial4j.core.context.simple.SimpleSpatialContext;
+import com.spatial4j.core.context.simple.SimpleSpatialContextFactory;
 import com.spatial4j.core.shape.SpatialRelation;
 import com.spatial4j.core.shape.Point;
 import com.spatial4j.core.shape.Rectangle;
@@ -41,7 +42,7 @@ public class TestDistances {
 
   @Before
   public void beforeTest() {
-    ctx = new SimpleSpatialContext(DistanceUnits.KILOMETERS);
+    ctx = new SimpleSpatialContext(); // WGS84
     EPS = 10e-4;//delta when doing double assertions. Geo eps is not that small.
   }
 
@@ -76,7 +77,7 @@ public class TestDistances {
     assertEquals("0 dist, horiz line",
         -45,dc().calcBoxByDistFromPtHorizAxis(ctx.makePoint(-180,-45),0,ctx),0);
 
-    double MAXDIST = ctx.getUnits().earthCircumference() / 2;
+    double MAXDIST = ctx.getEquatorRadius() * Math.PI; //ctx.getUnits().earthCircumference() / 2;
     checkBBox(ctx.makePoint(0,0), MAXDIST);
     checkBBox(ctx.makePoint(0,0), MAXDIST *0.999999);
     checkBBox(ctx.makePoint(0,0),0);
@@ -162,7 +163,7 @@ public class TestDistances {
 
   @Test
   public void testDistCalcPointOnBearing_cartesian() {
-    ctx = new SimpleSpatialContext(DistanceUnits.CARTESIAN);
+    ctx = new SimpleSpatialContextFactory().newMaxCartesian();
     EPS = 10e-6;//tighter epsilon (aka delta)
     for(int i = 0; i < 1000; i++) {
       testDistCalcPointOnBearing(random.nextInt(100));
@@ -184,7 +185,7 @@ public class TestDistances {
 //      double calcDist = dc().distance(c, p2);
 //      assertEqualsRatio(dist, calcDist);
 //    }
-    double maxDist = ctx.getUnits().earthCircumference() / 2;
+    double maxDist = ctx.getEquatorRadius() * Math.PI; ;
     for(int i = 0; i < 1000; i++) {
       int dist = random.nextInt((int) maxDist);
       EPS = (dist < maxDist*0.75 ? 10e-6 : 10e-3);
@@ -250,11 +251,11 @@ public class TestDistances {
   public void testDistToRadians() {
     assertDistToRadians(0);
     assertDistToRadians(500);
-    assertDistToRadians(ctx.getUnits().earthRadius());
+    assertDistToRadians(ctx.getCRS().getProjection().getEquatorRadius());
   }
 
   private void assertDistToRadians(double dist) {
-    double radius = ctx.getUnits().earthRadius();
+    double radius = ctx.getCRS().getProjection().getEquatorRadius();
     assertEquals(
         DistanceUtils.pointOnBearingRAD(0, 0, DistanceUtils.dist2Radians(dist, radius), DistanceUtils.DEG_90_AS_RADS, null)[1],
         DistanceUtils.dist2Radians(dist, radius),10e-5);

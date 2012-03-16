@@ -18,10 +18,12 @@
 package com.spatial4j.core.shape;
 
 import com.spatial4j.core.context.SpatialContext;
+import com.spatial4j.core.context.SpatialContextFactory;
 import com.spatial4j.core.context.simple.SimpleSpatialContext;
 import com.spatial4j.core.distance.DistanceCalculator;
-import com.spatial4j.core.distance.DistanceUnits;
 import com.spatial4j.core.distance.GeodesicSphereDistCalc;
+import com.spatial4j.proj4j.CoordinateReferenceSystem;
+
 import org.junit.Test;
 
 import static com.spatial4j.core.shape.SpatialRelation.*;
@@ -106,7 +108,7 @@ public class TestShapesGeo extends AbstractTestShapes {
 
     //--Now proceed with systematic testing:
 
-    double distToOpposeSide = ctx.getUnits().earthRadius()*Math.PI;
+    double distToOpposeSide = ctx.getEquatorRadius()*Math.PI;
     assertEquals(ctx.getWorldBounds(),ctx.makeCircle(0,0,distToOpposeSide).getBoundingBox());
     //assertEquals(ctx.makeCircle(0,0,distToOpposeSide/2 - 500).getBoundingBox());
 
@@ -117,7 +119,7 @@ public class TestShapesGeo extends AbstractTestShapes {
         testCircle(x, y, 0);
         testCircle(x, y, 500);
         testCircle(x, y, degToDist(90));
-        testCircle(x, y, ctx.getUnits().earthRadius()*6);
+        testCircle(x, y, ctx.getEquatorRadius()*6);
       }
     }
 
@@ -130,20 +132,18 @@ public class TestShapesGeo extends AbstractTestShapes {
 
   @Override
   protected SpatialContext getContext() {
-    DistanceUnits units = DistanceUnits.KILOMETERS;
-    DistanceCalculator distCalc = new GeodesicSphereDistCalc.Haversine(units.earthRadius());//default
+    CoordinateReferenceSystem crs = SpatialContextFactory.CRS_WGS84;
+    double radius = crs.getProjection().getEquatorRadius();
+    DistanceCalculator distCalc = new GeodesicSphereDistCalc.Haversine(radius);//default
     switch(random.nextInt(3)) {
       case 2:
         //TODO ENABLE WHEN WORKING
         //distCalc = new GeodesicSphereDistCalc.LawOfCosines(units.earthRadius());
         break;
       case 1:
-        distCalc = new GeodesicSphereDistCalc.Vincenty(units.earthRadius());
+        distCalc = new GeodesicSphereDistCalc.Vincenty(radius);
         break;
     }
-    return new SimpleSpatialContext(units,
-        distCalc,
-        SpatialContext.GEO_WORLDBOUNDS);
+    return new SimpleSpatialContext(crs,distCalc);
   }
-
 }

@@ -110,7 +110,7 @@ public class KMLHelper
 
   public static void main( String[] args ) throws Exception
   {
-    SpatialContext ctx = SimpleSpatialContext.GEO_KM;
+    SpatialContext ctx = new JtsSpatialContext();
     QuadPrefixTree grid = new QuadPrefixTree(ctx, 16 ); // make it like WGS84
 
 
@@ -139,7 +139,7 @@ public class KMLHelper
 //    shape = new JTSIndexible( "POINT(6 8)" ); // very small display!
 //    shape = new JTSIndexible( "POINT(3.5 5.6)" );
 
-    ctx = JtsSpatialContext.GEO_KM;
+    ctx = new JtsSpatialContext();
     GeometricShapeFactory gsf = new GeometricShapeFactory();
     gsf.setCentre( new com.vividsolutions.jts.geom.Coordinate( 4,2 ) );
     gsf.setSize( 4 );

@@ -18,20 +18,19 @@
 package com.spatial4j.core.shape;
 
 import com.spatial4j.core.context.SpatialContext;
-import com.spatial4j.core.context.simple.SimpleSpatialContext;
-import com.spatial4j.core.distance.DistanceUnits;
+import com.spatial4j.core.context.simple.SimpleSpatialContextFactory;
+
 import org.junit.Test;
 
 import static com.spatial4j.core.shape.SpatialRelation.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 
 public class TestShapes2D extends AbstractTestShapes {
 
   @Override
   protected SpatialContext getContext() {
-    return new SimpleSpatialContext(DistanceUnits.CARTESIAN);
+    return new SimpleSpatialContextFactory().newMaxCartesian();
   }
 
   @Test
@@ -87,6 +86,4 @@ public class TestShapes2D extends AbstractTestShapes {
 
     testCircleIntersect();
   }
-
-
 }

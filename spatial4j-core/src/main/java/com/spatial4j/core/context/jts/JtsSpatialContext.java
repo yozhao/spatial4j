@@ -24,8 +24,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.*;
 import com.vividsolutions.jts.util.GeometricShapeFactory;
 import com.spatial4j.core.context.SpatialContext;
+import com.spatial4j.core.context.SpatialContextFactory;
 import com.spatial4j.core.distance.DistanceCalculator;
-import com.spatial4j.core.distance.DistanceUnits;
 import com.spatial4j.core.exception.InvalidShapeException;
 import com.spatial4j.core.shape.Circle;
 import com.spatial4j.core.shape.Point;
@@ -33,8 +33,8 @@ import com.spatial4j.core.shape.Rectangle;
 import com.spatial4j.core.shape.Shape;
 import com.spatial4j.core.shape.simple.CircleImpl;
 import com.spatial4j.core.shape.simple.GeoCircleImpl;
-import com.spatial4j.core.shape.simple.RectangleImpl;
 import com.spatial4j.core.shape.jts.*;
+import com.spatial4j.proj4j.CoordinateReferenceSystem;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -47,21 +47,23 @@ public class JtsSpatialContext extends SpatialContext {
   private static final byte TYPE_BBOX = 1;
   private static final byte TYPE_GEO = 2;
 
-  public GeometryFactory factory;
+  public GeometryFactory factory = new GeometryFactory();
 
-  public static JtsSpatialContext GEO_KM = new JtsSpatialContext(DistanceUnits.KILOMETERS);
+  public JtsSpatialContext() {
+    super(SpatialContextFactory.CRS_WGS84,null);
+  }
   
-  public JtsSpatialContext( DistanceUnits units ) {
-    this( null, units, null, null);
+  public JtsSpatialContext(CoordinateReferenceSystem crs, DistanceCalculator calculator) {
+    super(crs,calculator);
+  }
+  
+  public JtsSpatialContext(Rectangle bounds, DistanceCalculator calculator) {
+    super(bounds,calculator);
   }
 
-  public JtsSpatialContext(GeometryFactory f, DistanceUnits units, DistanceCalculator calculator, Rectangle worldBounds) {
-    super( units, calculator, worldBounds);
-    if (f == null)
-      f = new GeometryFactory();
-    factory = f;
-  }
-
+  //-----------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------
+  
   @Override
   public Shape readShape(String str) throws InvalidShapeException {
     Shape shape = super.readStandardShape(str);

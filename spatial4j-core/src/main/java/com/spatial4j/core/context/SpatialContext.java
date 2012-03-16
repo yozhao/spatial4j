@@ -23,8 +23,8 @@ import com.spatial4j.core.shape.Circle;
 import com.spatial4j.core.shape.Point;
 import com.spatial4j.core.shape.Rectangle;
 import com.spatial4j.core.shape.Shape;
-import com.spatial4j.core.shape.simple.RectangleImpl;
-
+import com.spatial4j.proj4j.CoordinateReferenceSystem;
+import com.spatial4j.proj4j.proj.Projection;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -35,20 +35,11 @@ import java.util.StringTokenizer;
  */
 public abstract class SpatialContext {
 
-  //These are non-null
-  private final DistanceUnits units;
+  private final CoordinateReferenceSystem crs; // null if simple cartesian
   private final DistanceCalculator calculator;
   private final Rectangle worldBounds;
 
-  public static RectangleImpl GEO_WORLDBOUNDS = new RectangleImpl(-180,180,-90,90);
-  public static RectangleImpl MAX_WORLDBOUNDS;
-  static {
-    double v = Double.MAX_VALUE;
-    MAX_WORLDBOUNDS = new RectangleImpl(-v, v, -v, v);
-  }
-  
   protected final Double maxCircleDistance;//only for geo
-  protected final boolean NUDGE = false;//TODO document
 
   /**
    *
@@ -56,41 +47,54 @@ public abstract class SpatialContext {
    * @param calculator Optional; defaults to Haversine or cartesian depending on units.
    * @param worldBounds Optional; defaults to GEO_WORLDBOUNDS or MAX_WORLDBOUNDS depending on units.
    */
-  protected SpatialContext(DistanceUnits units, DistanceCalculator calculator, Rectangle worldBounds) {
-    if (units == null)
-      throw new IllegalArgumentException("units can't be null");
-    this.units = units;
+  protected SpatialContext(CoordinateReferenceSystem crs, DistanceCalculator calculator) {
+    if (crs == null)
+      throw new IllegalArgumentException("projection can't be null");
+    
+    this.crs = crs;
 
+    Projection p = crs.getProjection();
     if (calculator == null) {
-      calculator = isGeo()
-          ? new GeodesicSphereDistCalc.Haversine(units.earthRadius())
-          : new CartesianDistCalc();
+      calculator = new GeodesicSphereDistCalc.Haversine(p.getEquatorRadius());
     }
     this.calculator = calculator;
 
-    if (worldBounds == null) {
-      worldBounds = isGeo() ? GEO_WORLDBOUNDS : MAX_WORLDBOUNDS;
-    } else {
-      if (isGeo())
-        assert new RectangleImpl(worldBounds).equals(GEO_WORLDBOUNDS);
-      if (worldBounds.getCrossesDateLine())
-        throw new IllegalArgumentException("worldBounds shouldn't cross dateline: "+worldBounds);
-    }
     //copy so we can ensure we have the right implementation
-    worldBounds = makeRect(worldBounds.getMinX(),worldBounds.getMaxX(),worldBounds.getMinY(),worldBounds.getMaxY());
-    this.worldBounds = worldBounds;
+    worldBounds = makeRect(
+        p.getMinLongitude(),p.getMaxLongitude(),
+        p.getMinLatitude(),p.getMinLatitude());
     
-    this.maxCircleDistance = isGeo() ? calculator.degreesToDistance(180) : null;
+    this.maxCircleDistance = calculator.degreesToDistance(180);
   }
 
-  public DistanceUnits getUnits() {
-    return units;
+
+  protected SpatialContext(Rectangle bounds, DistanceCalculator calculator) {
+    if (bounds == null)
+      throw new IllegalArgumentException("bounds can't be null");
+
+    this.crs = null;
+    if (calculator == null) {
+      calculator = new CartesianDistCalc();
+    }
+    this.calculator = calculator;
+
+    //copy so we can ensure we have the right implementation
+    worldBounds = makeRect(bounds.getMinX(),bounds.getMaxX(),bounds.getMinY(),bounds.getMaxY());
+    maxCircleDistance = null;
+  }
+  
+  public CoordinateReferenceSystem getCRS() {
+    return crs;
   }
 
   public DistanceCalculator getDistCalc() {
     return calculator;
   }
 
+  public double getEquatorRadius() {
+    return crs.getProjection().getEquatorRadius();
+  }
+  
   public Rectangle getWorldBounds() {
     return worldBounds;
   }
@@ -114,7 +118,7 @@ public abstract class SpatialContext {
    * Is this a geospatial context (true) or simply 2d spatial (false)
    */
   public boolean isGeo() {
-    return getUnits().isGeo();
+    return crs != null;
   }
 
   /**
@@ -209,6 +213,7 @@ public abstract class SpatialContext {
 
     if (str.indexOf(',') != -1)
       return readLatCommaLonPoint(str);
+    
     StringTokenizer st = new StringTokenizer(str, " ");
     double p0 = Double.parseDouble(st.nextToken());
     double p1 = Double.parseDouble(st.nextToken());
@@ -238,10 +243,9 @@ public abstract class SpatialContext {
   @Override
   public String toString() {
     return getClass().getSimpleName()+"{" +
-        "units=" + units +
+        "crs=" + crs +
         ", calculator=" + calculator +
         ", worldBounds=" + worldBounds +
         '}';
   }
-
 }

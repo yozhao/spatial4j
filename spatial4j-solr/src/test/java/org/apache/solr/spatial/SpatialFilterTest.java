@@ -19,6 +19,7 @@ package org.apache.solr.spatial;
 
 
 import com.spatial4j.core.context.SpatialContext;
+import com.spatial4j.core.context.jts.JtsSpatialContext;
 import com.spatial4j.core.context.simple.SimpleSpatialContext;
 import com.spatial4j.core.distance.DistanceUtils;
 import com.spatial4j.core.shape.Point;
@@ -148,7 +149,7 @@ public class SpatialFilterTest extends SolrTestCaseJ4 {
   
   //Needs to be <= what's used in the test schema.xml; best to use the same
   final int PRECISION = 12;//aka geohash length
-  final SpatialContext ctx = SimpleSpatialContext.GEO_KM;//barely needed
+  final SpatialContext ctx = new JtsSpatialContext();//barely needed
 
   @Test
   public void testBug1() {
@@ -244,7 +245,11 @@ public class SpatialFilterTest extends SolrTestCaseJ4 {
 
   private double calcDist(Point p1, Point p2) {
     //TODO use ctx.calc?
-    return DistanceUtils.distHaversineRAD(DistanceUtils.toRadians(p1.getY()), DistanceUtils.toRadians(p1.getX()), DistanceUtils.toRadians(p2.getY()), DistanceUtils.toRadians(p2.getX())) * ctx.getUnits().earthRadius();
+    return DistanceUtils.distHaversineRAD(
+        DistanceUtils.toRadians(p1.getY()), 
+        DistanceUtils.toRadians(p1.getX()), 
+        DistanceUtils.toRadians(p2.getY()), 
+        DistanceUtils.toRadians(p2.getX())) * ctx.getEquatorRadius();
   }
 
   /** Normalize x & y (put in lon-lat ranges) & ensure geohash round-trip for given precision. */

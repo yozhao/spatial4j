@@ -232,7 +232,7 @@ public class DistanceUtils {
   public static Rectangle calcBoxByDistFromPtDEG(double lat, double lon, double distance, SpatialContext ctx) {
     //See http://janmatuschek.de/LatitudeLongitudeBoundingCoordinates Section 3.1, 3.2 and 3.3
 
-    double radius = ctx.getUnits().earthRadius();
+    double radius = ctx.getCRS().getProjection().getEquatorRadius();
     double dist_rad = distance / radius;
     double dist_deg = Math.toDegrees(dist_rad);
 

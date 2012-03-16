@@ -21,11 +21,13 @@ import com.spatial4j.core.context.SpatialContext;
 import com.spatial4j.core.context.SpatialContextFactory;
 
 /**
-* @author dsmiley
 */
 public class SimpleSpatialContextFactory extends SpatialContextFactory {
   @Override
   protected SpatialContext newSpatialContext() {
-    return new SimpleSpatialContext(units,calculator,worldBounds);
+    if(worldBounds!=null) {
+      return new SimpleSpatialContext(worldBounds,calculator);
+    }
+    return new SimpleSpatialContext(crs,calculator);
   }
 }

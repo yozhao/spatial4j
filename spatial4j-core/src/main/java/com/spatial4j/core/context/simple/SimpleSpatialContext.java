@@ -18,8 +18,8 @@
 package com.spatial4j.core.context.simple;
 
 import com.spatial4j.core.context.SpatialContext;
+import com.spatial4j.core.context.SpatialContextFactory;
 import com.spatial4j.core.distance.DistanceCalculator;
-import com.spatial4j.core.distance.DistanceUnits;
 import com.spatial4j.core.exception.InvalidShapeException;
 import com.spatial4j.core.shape.Circle;
 import com.spatial4j.core.shape.Point;
@@ -29,21 +29,25 @@ import com.spatial4j.core.shape.simple.CircleImpl;
 import com.spatial4j.core.shape.simple.GeoCircleImpl;
 import com.spatial4j.core.shape.simple.PointImpl;
 import com.spatial4j.core.shape.simple.RectangleImpl;
+import com.spatial4j.proj4j.CoordinateReferenceSystem;
 
 import java.text.NumberFormat;
 import java.util.Locale;
 
 public class SimpleSpatialContext extends SpatialContext {
 
-  public static SimpleSpatialContext GEO_KM = new SimpleSpatialContext(DistanceUnits.KILOMETERS);
-
-  public SimpleSpatialContext(DistanceUnits units) {
-    this(units, null, null);
+  public SimpleSpatialContext() {
+    super(SpatialContextFactory.CRS_WGS84,null);
   }
-
-  public SimpleSpatialContext(DistanceUnits units, DistanceCalculator calculator, Rectangle worldBounds) {
-    super(units, calculator, worldBounds);
+  
+  public SimpleSpatialContext(CoordinateReferenceSystem crs, DistanceCalculator calculator) {
+    super(crs,calculator);
   }
+  
+  public SimpleSpatialContext(Rectangle bounds, DistanceCalculator calculator) {
+    super(bounds,calculator);
+  }
+  
 
   @Override
   public Shape readShape(String value) throws InvalidShapeException {
