@@ -1,0 +1,4 @@
+TODO? should we add the CRS databases from:
+http://svn.osgeo.org/metacrs/proj4j/trunk/src/main/resources/
+
+~1MB, would allow loading standard EPSG based projections
