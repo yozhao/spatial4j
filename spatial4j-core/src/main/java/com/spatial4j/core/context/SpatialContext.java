@@ -32,6 +32,10 @@ import java.util.StringTokenizer;
 /**
  * This holds things like distance units, distance calculator, and world bounds.
  * Threadsafe & immutable.
+ * 
+ * Good article on projections:
+ * http://www.sharpgis.net/post/2007/05/05/Spatial-references2c-coordinate-systems2c-projections2c-datums2c-ellipsoids-e28093-confusing.aspx
+ * 
  */
 public abstract class SpatialContext {
 
