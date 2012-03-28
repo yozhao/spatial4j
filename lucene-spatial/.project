@@ -1,0 +1,19 @@
+<projectDescription>
+  <name>lucene-spatial</name>
+  <comment>Spatial Strategies for Apache Lucene</comment>
+  <projects>
+    <project>spatial4j</project>
+  </projects>
+  <buildSpec>
+    <buildCommand>
+      <name>org.eclipse.jdt.core.javabuilder</name>
+    </buildCommand>
+    <buildCommand>
+      <name>qwickie.qwickieBuilder</name>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.eclipse.jdt.core.javanature</nature>
+    <nature>qwickie.qwickieNature</nature>
+  </natures>
+</projectDescription>

@@ -37,7 +37,7 @@ public abstract class SpatialContextFactory {
   public static final CoordinateReferenceSystem CRS_WGS84;
   static {
     CRSFactory factory = new CRSFactory();
-    CRS_WGS84 = factory.createFromParameters("WGS84", PROJ4_WGS84);
+    CRS_WGS84 = factory.createFromParameters("WGS84", PROJ4_WGS84);  // Assume it will not change?
   }
   protected ClassLoader classLoader;
   
