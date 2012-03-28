@@ -18,7 +18,6 @@
 package org.apache.lucene.spatial.prefix.tree;
 
 import com.spatial4j.core.context.SpatialContext;
-import com.spatial4j.core.distance.DistanceUnits;
 import com.spatial4j.core.distance.DistanceUtils;
 
 import java.util.Map;
@@ -28,7 +27,7 @@ import java.util.Map;
  */
 public abstract class SpatialPrefixTreeFactory {
 
-  private static final double DEFAULT_GEO_MAX_DETAIL_KM = 0.001;//1m
+  private static final double DEFAULT_GEO_MAX_DETAIL_M = 1;
 
   protected Map<String, String> args;
   protected SpatialContext ctx;
@@ -78,9 +77,9 @@ public abstract class SpatialPrefixTreeFactory {
       if (!ctx.isGeo()) {
         return;//let default to max
       }
-      degrees = DistanceUtils.dist2Degrees(DEFAULT_GEO_MAX_DETAIL_KM, DistanceUnits.KILOMETERS.earthRadius());
+      degrees = DistanceUtils.dist2Degrees(DEFAULT_GEO_MAX_DETAIL_M, ctx.getEquatorRadius());
     } else {
-      degrees = DistanceUtils.dist2Degrees(Double.parseDouble(maxDetailDistStr), ctx.getUnits().earthRadius());
+      degrees = DistanceUtils.dist2Degrees(Double.parseDouble(maxDetailDistStr), ctx.getEquatorRadius());
     }
     maxLevels = getLevelForDistance(degrees) + 1;//returns 1 greater
   }

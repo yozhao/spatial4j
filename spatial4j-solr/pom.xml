@@ -68,8 +68,24 @@
 	  <groupId>org.apache.solr</groupId>
 	  <artifactId>solr-core</artifactId>
 	  <version>${lucene.version}</version>
+	  <!--
+    <exclusions>
+      <exclusion>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-spatial</artifactId>
+      </exclusion>
+    </exclusions>
+    -->
 	</dependency>
 
+<!--
+	<dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-spatial</artifactId>
+	  <version>${project.version}</version>
+	</dependency>
+	-->
+	
     <!-- TESTING -->
   </dependencies>
   

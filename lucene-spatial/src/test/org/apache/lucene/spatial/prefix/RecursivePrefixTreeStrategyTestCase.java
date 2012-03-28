@@ -18,6 +18,7 @@
 package org.apache.lucene.spatial.prefix;
 
 import com.spatial4j.core.context.SpatialContext;
+import com.spatial4j.core.context.SpatialContextFactory;
 import com.spatial4j.core.context.simple.SimpleSpatialContext;
 import org.junit.Before;
 
@@ -31,6 +32,6 @@ public class RecursivePrefixTreeStrategyTestCase extends BaseRecursivePrefixTree
 
   @Override
   protected SpatialContext getSpatialContext() {
-    return SimpleSpatialContext.GEO_KM;
+    return new SimpleSpatialContext(SpatialContextFactory.CRS_WGS84, null);
   }
 }

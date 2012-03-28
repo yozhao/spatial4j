@@ -17,6 +17,7 @@
 
 package org.apache.lucene.spatial.prefix.tree;
 
+import com.spatial4j.core.context.SpatialContextFactory;
 import com.spatial4j.core.context.simple.SimpleSpatialContext;
 import com.spatial4j.core.shape.Rectangle;
 import com.spatial4j.core.shape.Shape;
@@ -34,7 +35,7 @@ public class SpatialPrefixTreeTest extends LuceneTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    ctx = SimpleSpatialContext.GEO_KM;
+    ctx = new SimpleSpatialContext(SpatialContextFactory.CRS_WGS84, null);
     trie = new GeohashPrefixTree(ctx,4);
   }
 

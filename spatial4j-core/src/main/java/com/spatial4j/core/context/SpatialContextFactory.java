@@ -24,6 +24,9 @@ import com.spatial4j.core.shape.Rectangle;
 import com.spatial4j.core.shape.simple.RectangleImpl;
 import com.spatial4j.proj4j.CRSFactory;
 import com.spatial4j.proj4j.CoordinateReferenceSystem;
+import com.spatial4j.proj4j.datum.Datum;
+import com.spatial4j.proj4j.proj.LongLatProjection;
+import com.spatial4j.proj4j.proj.Projection;
 import com.spatial4j.proj4j.units.Unit;
 import com.spatial4j.proj4j.units.Units;
 
@@ -36,8 +39,11 @@ public abstract class SpatialContextFactory {
   public static final String PROJ4_WGS84 = "+title=WGS84 +proj=longlat +datum=WGS84 +units=degrees";
   public static final CoordinateReferenceSystem CRS_WGS84;
   static {
-    CRSFactory factory = new CRSFactory();
-    CRS_WGS84 = factory.createFromParameters("WGS84", PROJ4_WGS84);  // Assume it will not change?
+    Projection geoProj = new LongLatProjection();
+    geoProj.setEllipsoid(Datum.WGS84.getEllipsoid());
+    geoProj.setUnits(Units.DEGREES);
+    geoProj.initialize();
+    CRS_WGS84 = new CoordinateReferenceSystem("WGS84", null, Datum.WGS84, geoProj); // Assume it will not change?
   }
   protected ClassLoader classLoader;
   

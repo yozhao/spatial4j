@@ -18,12 +18,13 @@
 package org.apache.lucene.spatial.vector;
 
 import com.spatial4j.core.context.SpatialContext;
+import com.spatial4j.core.context.SpatialContextFactory;
 import com.spatial4j.core.context.simple.SimpleSpatialContext;
 
 public class TwoDoublesStrategyTestCase extends BaseTwoDoublesStrategyTestCase {
 
   @Override
   protected SpatialContext getSpatialContext() {
-    return SimpleSpatialContext.GEO_KM;
+    return new SimpleSpatialContext(SpatialContextFactory.CRS_WGS84, null);
   }
 }

@@ -18,6 +18,7 @@
 package org.apache.lucene.spatial.prefix;
 
 import com.spatial4j.core.context.SpatialContext;
+import com.spatial4j.core.context.SpatialContextFactory;
 import com.spatial4j.core.context.simple.SimpleSpatialContext;
 import com.spatial4j.core.query.SpatialArgsParser;
 import com.spatial4j.core.shape.Shape;
@@ -39,7 +40,7 @@ public class TestTermQueryPrefixGridStrategy extends SpatialTestCase {
   @Test
   public void testNGramPrefixGridLosAngeles() throws IOException {
     SimpleSpatialFieldInfo fieldInfo = new SimpleSpatialFieldInfo("geo");
-    SpatialContext ctx = SimpleSpatialContext.GEO_KM;
+    SpatialContext ctx = new SimpleSpatialContext(SpatialContextFactory.CRS_WGS84, null);
     TermQueryPrefixTreeStrategy prefixGridStrategy = new TermQueryPrefixTreeStrategy(new QuadPrefixTree(ctx));
 
     Shape point = new PointImpl(-118.243680, 34.052230);

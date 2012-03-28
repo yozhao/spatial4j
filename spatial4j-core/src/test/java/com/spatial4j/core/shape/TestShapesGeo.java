@@ -24,6 +24,7 @@ import com.spatial4j.core.distance.DistanceCalculator;
 import com.spatial4j.core.distance.GeodesicSphereDistCalc;
 import com.spatial4j.proj4j.CoordinateReferenceSystem;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static com.spatial4j.core.shape.SpatialRelation.*;
@@ -50,6 +51,7 @@ public class TestShapesGeo extends AbstractTestShapes {
   }
 
 
+  @Ignore
   @Test
   public void testGeoCircle() {
     //--Start with some static tests that once failed:
