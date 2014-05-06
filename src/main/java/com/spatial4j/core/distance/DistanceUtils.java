@@ -21,7 +21,6 @@ import com.spatial4j.core.context.SpatialContext;
 import com.spatial4j.core.shape.Point;
 import com.spatial4j.core.shape.Rectangle;
 
-
 /**
  * Various distance calculations and constants. To the extent possible, a {@link
  * com.spatial4j.core.distance.DistanceCalculator}, retrieved from {@link
@@ -46,8 +45,8 @@ public class DistanceUtils {
   @Deprecated
   public static final double DEG_270_AS_RADS = 3 * DEG_90_AS_RADS;
 
-  public static final double DEGREES_TO_RADIANS =  Math.PI / 180;
-  public static final double RADIANS_TO_DEGREES =  1 / DEGREES_TO_RADIANS;
+  public static final double DEGREES_TO_RADIANS = Math.PI / 180;
+  public static final double RADIANS_TO_DEGREES = 1 / DEGREES_TO_RADIANS;
 
   public static final double KM_TO_MILES = 0.621371192;
   public static final double MILES_TO_KM = 1 / KM_TO_MILES;//1.609
@@ -67,7 +66,8 @@ public class DistanceUtils {
   public static final double EARTH_MEAN_RADIUS_MI = EARTH_MEAN_RADIUS_KM * KM_TO_MILES;
   public static final double EARTH_EQUATORIAL_RADIUS_MI = EARTH_EQUATORIAL_RADIUS_KM * KM_TO_MILES;
 
-  private DistanceUtils() {}
+  private DistanceUtils() {
+  }
 
   /**
    * Calculate the p-norm (i.e. length) between two vectors.
@@ -100,7 +100,8 @@ public class DistanceUtils {
    * @return The length.
    */
   @Deprecated
-  public static double vectorDistance(double[] vec1, double[] vec2, double power, double oneOverPower) {
+  public static double vectorDistance(double[] vec1, double[] vec2, double power,
+      double oneOverPower) {
     double result = 0;
 
     if (power == 0) {
@@ -137,7 +138,8 @@ public class DistanceUtils {
    * @return The point, either the upperLeft or the lower right
    */
   @Deprecated
-  public static double[] vectorBoxCorner(double[] center, double[] result, double distance, boolean upperRight) {
+  public static double[] vectorBoxCorner(double[] center, double[] result, double distance,
+      boolean upperRight) {
     if (result == null || result.length != center.length) {
       result = new double[center.length];
     }
@@ -147,7 +149,8 @@ public class DistanceUtils {
     //We don't care about the power here,
     // b/c we are always in a rectangular coordinate system, so any norm can be used by
     //using the definition of sine
-    distance = SIN_45_AS_RADS * distance; // sin(Pi/4) == (2^0.5)/2 == opp/hyp == opp/distance, solve for opp, similarly for cosine
+    distance = SIN_45_AS_RADS
+        * distance; // sin(Pi/4) == (2^0.5)/2 == opp/hyp == opp/distance, solve for opp, similarly for cosine
     for (int i = 0; i < center.length; i++) {
       result[i] = center[i] + distance;
     }
@@ -165,9 +168,10 @@ public class DistanceUtils {
    * @param reuse A preallocated object to hold the results.
    * @return The destination point, IN RADIANS.
    */
-  public static Point pointOnBearingRAD(double startLat, double startLon, double distanceRAD, double bearingRAD, SpatialContext ctx, Point reuse) {
+  public static Point pointOnBearingRAD(double startLat, double startLon, double distanceRAD,
+      double bearingRAD, SpatialContext ctx, Point reuse) {
     /*
- 	  lat2 = asin(sin(lat1)*cos(d/R) + cos(lat1)*sin(d/R)*cos(θ))
+     lat2 = asin(sin(lat1)*cos(d/R) + cos(lat1)*sin(d/R)*cos(θ))
   	lon2 = lon1 + atan2(sin(θ)*sin(d/R)*cos(lat1), cos(d/R)−sin(lat1)*sin(lat2))
      */
     double cosAngDist = Math.cos(distanceRAD);
@@ -178,8 +182,8 @@ public class DistanceUtils {
         cosStartLat * sinAngDist * Math.cos(bearingRAD);
     double lat2 = Math.asin(sinLat2);
     double lon2 = startLon + Math.atan2(Math.sin(bearingRAD) * sinAngDist * cosStartLat,
-            cosAngDist - sinStartLat * sinLat2);
-    
+        cosAngDist - sinStartLat * sinLat2);
+
     // normalize lon first
     if (lon2 > DEG_180_AS_RADS) {
       lon2 = -1.0 * (DEG_180_AS_RADS - (lon2 - DEG_180_AS_RADS));
@@ -234,7 +238,7 @@ public class DistanceUtils {
     if (lat_deg >= -90 && lat_deg <= 90)
       return lat_deg;//common case, and avoids slight double precision shifting
     double off = Math.abs((lat_deg + 90) % 360);
-    return (off <= 180 ? off : 360-off) - 90;
+    return (off <= 180 ? off : 360 - off) - 90;
   }
 
   /**
@@ -242,13 +246,23 @@ public class DistanceUtils {
    * and distance.  <code>reuse</code> is an optional argument to store the
    * results to avoid object creation.
    */
-  public static Rectangle calcBoxByDistFromPtDEG(double lat, double lon, double distDEG, SpatialContext ctx, Rectangle reuse) {
+  public static Rectangle calcBoxByDistFromPtDEG(double lat, double lon, double distDEG,
+      SpatialContext ctx, Rectangle reuse) {
     //See http://janmatuschek.de/LatitudeLongitudeBoundingCoordinates Section 3.1, 3.2 and 3.3
-    double minX; double maxX; double minY; double maxY;
+    double minX;
+    double maxX;
+    double minY;
+    double maxY;
     if (distDEG == 0) {
-      minX = lon; maxX = lon; minY = lat; maxY = lat;
+      minX = lon;
+      maxX = lon;
+      minY = lat;
+      maxY = lat;
     } else if (distDEG >= 180) {//distance is >= opposite side of the globe
-      minX = -180; maxX = 180; minY = -90; maxY = 90;
+      minX = -180;
+      maxX = 180;
+      minY = -90;
+      maxY = 90;
     } else {
 
       //--calc latitude bounds
@@ -257,7 +271,8 @@ public class DistanceUtils {
 
       if (maxY >= 90 || minY <= -90) {//touches either pole
         //we have special logic for longitude
-        minX = -180; maxX = 180;//world wrap: 360 deg
+        minX = -180;
+        maxX = 180;//world wrap: 360 deg
         if (maxY <= 90 && minY >= -90) {//doesn't pass either pole: 180 deg
           minX = normLonDEG(lon - 90);
           maxX = normLonDEG(lon + 90);
@@ -310,8 +325,8 @@ public class DistanceUtils {
     //http://gis.stackexchange.com/questions/19221/find-tangent-point-on-circle-furthest-east-or-west
     if (distDEG == 0)
       return lat;
-    // if we don't do this when == 90 or -90, computed result can be (+/-)89.9999 when at pole.
-    //     No biggie but more accurate.
+      // if we don't do this when == 90 or -90, computed result can be (+/-)89.9999 when at pole.
+      //     No biggie but more accurate.
     else if (lat + distDEG >= 90)
       return 90;
     else if (lat - distDEG <= -90)
@@ -319,7 +334,7 @@ public class DistanceUtils {
 
     double lat_rad = toRadians(lat);
     double dist_rad = toRadians(distDEG);
-    double result_rad = Math.asin( Math.sin(lat_rad) / Math.cos(dist_rad));
+    double result_rad = Math.asin(Math.sin(lat_rad) / Math.cos(dist_rad));
     if (!Double.isNaN(result_rad))
       return toDegrees(result_rad);
     //handle NaN (shouldn't happen due to checks earlier)
@@ -405,7 +420,7 @@ public class DistanceUtils {
     double hsinX = Math.sin((lon1 - lon2) * 0.5);
     double hsinY = Math.sin((lat1 - lat2) * 0.5);
     double h = hsinY * hsinY +
-            (Math.cos(lat1) * Math.cos(lat2) * hsinX * hsinX);
+        (Math.cos(lat1) * Math.cos(lat2) * hsinX * hsinX);
     return 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
   }
 
@@ -448,6 +463,24 @@ public class DistanceUtils {
       return Math.acos(cosB);
   }
 
+  public static double cosineDistLawOfCosinesRAD(double lat1, double lon1, double lat2,
+      double lon2) {
+
+    //(MIGRATED FROM org.apache.lucene.spatial.geometry.LatLng.arcDistance()) (Lucene 3x)
+    // Imported from mq java client.  Variable references changed to match.
+
+    // Check for same position
+    if (lat1 == lat2 && lon1 == lon2)
+      return 1;
+
+    // Get the m_dLongitude difference. Don't need to worry about
+    // crossing 180 since cos(x) = cos(-x)
+    double dLon = lon2 - lon1;
+    double cosB = (Math.sin(lat1) * Math.sin(lat2))
+        + (Math.cos(lat1) * Math.cos(lat2) * Math.cos(dLon));
+    return cosB;
+  }
+
   /**
    * Calculates the great circle distance using the Vincenty Formula, simplified for a spherical model. This formula
    * is accurate for any pair of points. The equation
@@ -469,10 +502,10 @@ public class DistanceUtils {
     double sinDLon = Math.sin(dLon);
 
     double a = cosLat2 * sinDLon;
-    double b = cosLat1*sinLat2 - sinLat1*cosLat2*cosDLon;
-    double c = sinLat1*sinLat2 + cosLat1*cosLat2*cosDLon;
-    
-    return Math.atan2(Math.sqrt(a*a+b*b),c);
+    double b = cosLat1 * sinLat2 - sinLat1 * cosLat2 * cosDLon;
+    double c = sinLat1 * sinLat2 + cosLat1 * cosLat2 * cosDLon;
+
+    return Math.atan2(Math.sqrt(a * a + b * b), c);
   }
 
   /**

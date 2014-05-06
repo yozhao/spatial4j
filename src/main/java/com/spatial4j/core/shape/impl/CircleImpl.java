@@ -18,11 +18,14 @@
 package com.spatial4j.core.shape.impl;
 
 import com.spatial4j.core.context.SpatialContext;
+import com.spatial4j.core.distance.GeodesicSphereDistCalc;
 import com.spatial4j.core.shape.Circle;
 import com.spatial4j.core.shape.Point;
 import com.spatial4j.core.shape.Rectangle;
 import com.spatial4j.core.shape.Shape;
 import com.spatial4j.core.shape.SpatialRelation;
+
+import com.spatial4j.core.distance.DistanceUtils;
 
 /**
  * A circle, also known as a point-radius, based on a {@link
@@ -36,6 +39,8 @@ public class CircleImpl implements Circle {
 
   protected final Point point;
   protected double radiusDEG;
+  private double radiusCosine;
+  private boolean lawOfCosines;
 
   // calculated & cached
   protected Rectangle enclosingBox;
@@ -45,16 +50,21 @@ public class CircleImpl implements Circle {
     this.ctx = ctx;
     this.point = p;
     this.radiusDEG = point.isEmpty() ? Double.NaN : radiusDEG;
-    this.enclosingBox = point.isEmpty() ? ctx.makeRectangle(Double.NaN, Double.NaN, Double.NaN, Double.NaN) :
-      ctx.getDistCalc().calcBoxByDistFromPt(point, this.radiusDEG, ctx, null);
+    this.radiusCosine = Math.cos(DistanceUtils.toRadians(radiusDEG));
+    lawOfCosines = ctx.getDistCalc() instanceof GeodesicSphereDistCalc.LawOfCosines;
+    this.enclosingBox = point.isEmpty() ?
+        ctx.makeRectangle(Double.NaN, Double.NaN, Double.NaN, Double.NaN) :
+        ctx.getDistCalc().calcBoxByDistFromPt(point, this.radiusDEG, ctx, null);
   }
 
   @Override
   public void reset(double x, double y, double radiusDEG) {
-    assert ! isEmpty();
+    assert !isEmpty();
     point.reset(x, y);
     this.radiusDEG = radiusDEG;
-    this.enclosingBox = ctx.getDistCalc().calcBoxByDistFromPt(point, this.radiusDEG, ctx, enclosingBox);
+    this.radiusCosine = Math.cos(DistanceUtils.toRadians(radiusDEG));
+    this.enclosingBox = ctx.getDistCalc()
+        .calcBoxByDistFromPt(point, this.radiusDEG, ctx, enclosingBox);
   }
 
   @Override
@@ -87,7 +97,8 @@ public class CircleImpl implements Circle {
   }
 
   public boolean contains(double x, double y) {
-    return ctx.getDistCalc().within(point, x, y, radiusDEG);
+    double radius = lawOfCosines ? radiusCosine : radiusDEG;
+    return ctx.getDistCalc().within(point, x, y, radius);
   }
 
   @Override
@@ -105,10 +116,10 @@ public class CircleImpl implements Circle {
 
   @Override
   public SpatialRelation relate(Shape other) {
-//This shortcut was problematic in testing due to distinctions of CONTAINS/WITHIN for no-area shapes (lines, points).
-//    if (distance == 0) {
-//      return point.relate(other,ctx).intersects() ? SpatialRelation.WITHIN : SpatialRelation.DISJOINT;
-//    }
+    //This shortcut was problematic in testing due to distinctions of CONTAINS/WITHIN for no-area shapes (lines, points).
+    //    if (distance == 0) {
+    //      return point.relate(other,ctx).intersects() ? SpatialRelation.WITHIN : SpatialRelation.DISJOINT;
+    //    }
     if (isEmpty() || other.isEmpty())
       return SpatialRelation.DISJOINT;
     if (other instanceof Point) {
@@ -124,7 +135,9 @@ public class CircleImpl implements Circle {
   }
 
   public SpatialRelation relate(Point point) {
-    return contains(point.getX(),point.getY()) ? SpatialRelation.CONTAINS : SpatialRelation.DISJOINT;
+    return contains(point.getX(), point.getY()) ?
+        SpatialRelation.CONTAINS :
+        SpatialRelation.DISJOINT;
   }
 
   public SpatialRelation relate(Rectangle r) {
@@ -134,7 +147,8 @@ public class CircleImpl implements Circle {
     final SpatialRelation bboxSect = enclosingBox.relate(r);
     if (bboxSect == SpatialRelation.DISJOINT || bboxSect == SpatialRelation.WITHIN)
       return bboxSect;
-    else if (bboxSect == SpatialRelation.CONTAINS && enclosingBox.equals(r))//nasty identity edge-case
+    else if (bboxSect == SpatialRelation.CONTAINS && enclosingBox
+        .equals(r))//nasty identity edge-case
       return SpatialRelation.WITHIN;
     //bboxSect is INTERSECTS or CONTAINS
     //The result can be DISJOINT, CONTAINS, or INTERSECTS (not WITHIN)
@@ -203,7 +217,7 @@ public class CircleImpl implements Circle {
           return SpatialRelation.INTERSECTS;
       }
     }
-   
+
     return SpatialRelation.CONTAINS;
   }
 
@@ -241,7 +255,7 @@ public class CircleImpl implements Circle {
 
   @Override
   public boolean equals(Object obj) {
-    return equals(this,obj);
+    return equals(this, obj);
   }
 
   /**

@@ -98,7 +98,7 @@ public abstract class GeodesicSphereDistCalc extends AbstractDistanceCalculator 
 
     @Override
     protected double distanceLatLonRAD(double lat1, double lon1, double lat2, double lon2) {
-      return DistanceUtils.distHaversineRAD(lat1,lon1,lat2,lon2);
+      return DistanceUtils.distHaversineRAD(lat1, lon1, lat2, lon2);
     }
 
   }
@@ -109,6 +109,14 @@ public abstract class GeodesicSphereDistCalc extends AbstractDistanceCalculator 
     protected double distanceLatLonRAD(double lat1, double lon1, double lat2, double lon2) {
       return DistanceUtils.distLawOfCosinesRAD(lat1, lon1, lat2, lon2);
     }
+
+
+    @Override
+    public boolean within(Point from, double toX, double toY, double cosineDistance) {
+      return DistanceUtils.cosineDistLawOfCosinesRAD(toRadians(from.getY()), toRadians(from.getX()),
+          toRadians(toY), toRadians(toX)) >= cosineDistance;
+    }
+
 
   }
 
